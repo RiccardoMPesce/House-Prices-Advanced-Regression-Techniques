@@ -121,23 +121,34 @@ with pd.option_context('display.max_rows', None, 'display.max_columns', None):
 #%% [markdown]
 # #### Fitting our first model (Random Forest)
 # The next step will be to split our dataset into train and validation set. Validation set will help us predict test accuracy. Since we are dealing with temporal data, we are going to make sure that our validation set will be the newest sold records (2009-2010), while the previous one will make the training set.
-# Once we made this split, we will fit our model with different numbers of estimators, and we will pick the one with the highest score (R<sup>2</sup>).
+# We will try first a model with 100 esimators, and we will look at the oob score to see how well our model performs, and we will calculate the mean squared error, since it is the metric used for such competition.
 
 #%%
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error as mse
+
+n_est = 100
 
 # Selecting indices of rows
-i_train = list(X["YrSold"] < 2009)
-i_test = list(X["YrSold"] >= 2009)
+i_train = X["YrSold"] < 2009
+i_test = X["YrSold"] >= 2009
 
-X_train, y_train = X[i_train], y[i_train]
-X_test, y_test = X[i_test], y[i_test]
+X_train = X.loc[i_train]
+y_train = y.loc[i_train]
 
-print(len(y_train))
-print(len(y_test))
+display(X_train)
 
-# Using different numbers of estimators
+X_test = X.loc[i_test]
+y_test = y.loc[i_test]
+
+
+
+rf = RandomForestRegressor(n_estimators=n_est, n_jobs=-1, oob_score=True)
+rf.fit(X_train, y_train)
+print("OOB score is: " + str(rf.oob_score_.round(2)))
+
+preds = rf.predict(X_test)
+print("Mean squared error is: " + str(mse(y_test, preds).round(2)))
 
 
 #%%
