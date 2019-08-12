@@ -51,8 +51,25 @@ with pd.option_context("display.max_rows", None):
 #
 # The explanatory variable "FireplaceQu" has NaN whenever the variable "Fireplaces" is zero, i.e. absent. We will then set it to "Absent" where it has NA. This variable is an ordinal categorical variable (since it deals with quality). There are several categorical variables that have an intrinsic order, and for them we are going to use an ordinal encoder, where the absence will be indicated with 0.
 #
-# Some variables are highly correlated one another. We will see them with the correlation heatmap plotted in SeaBorn. For now, we can see that TotalBsmtSF is just the sum of BsmtFinSF1 and BsmtFinSF2, therefore the latter two can be dropped.
+# Some variables are highly correlated one another. We will see them with the correlation heatmap plotted in SeaBorn. For now, we can see that TotalBsmtSF is just the sum of BsmtFinSF1 and BsmtFinSF2, therefore the latter two can be dropped. Since the sale price will depend on both "1srFlrSF" and "2ndFlrSF" in conjunction, we can combine these two columns into one called "TotalSF".
+#
+# Binary columns indicate that such variable can hold a binary value (yes/no) and will be encoded as such.
 
 #%%
-cols_to_drop = ["MiscFeature", "Fence", "PoolQC", "Alley", "BsmtFinSF1", "BsmtFinSF2"]
-ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure"]
+cols_to_drop = ["MiscFeature", "Fence", "PoolQC", "Alley", "BsmtFinSF1", "BsmtFinSF2", "1stFlrSF", "2ndFlrSF"]
+ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond"]
+binary_cols = ["CentralAir", "PavedDrive"]
+
+# Selecting numerical and categorical columns
+cat_cols = train_df.select_dtypes(exclude="number")
+num_cols = train_df.select_dtypes("number")
+
+# Mutating columns
+train_df = train_df.assign(TotalSF=train_df["1stFlrSF"]+train_df["2ndFlrSF"])
+test_df = test_df.assign(TotalSF=test_df["1stFlrSF"]+test_df["2ndFlrSF"])
+
+# Dropping columns
+train_df.drop(cols_to_drop, axis=1, inplace=True)
+test_df.drop(cols_to_drop, axis=1, inplace=True)
+
+#%%
