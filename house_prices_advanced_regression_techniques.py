@@ -30,3 +30,29 @@ test_path = os.path.join(DATA_FOLDER, TEST_FILE)
 
 train_df = pd.read_csv(train_path)
 test_df = pd.read_csv(test_path)
+
+#%% [markdown]
+# Now that we have imported our data, let's give it a look, by displaying the first 20 rows. We will print each column so as to get a general idea of the predictors.
+
+#%%
+with pd.option_context("display.max_columns", None):
+    display(train_df.head(20))
+
+#%% [markdown]
+# ### Feature Engineering 
+# We can see that there are some columns whose values are mostly NAs. Since they won't bring any improvement to our models, there can be dropped from the dataset. Let's first see the fraction of NAs for each column.
+
+#%%
+with pd.option_context("display.max_rows", None):
+    print(train_df.isnull().mean().round(2))
+
+#%% [markdown]
+# We can see that MiscFeature, Fence, PoolQC, Alley are mainly composed of NAs. We will drop them. 
+#
+# The explanatory variable "FireplaceQu" has NaN whenever the variable "Fireplaces" is zero, i.e. absent. We will then set it to "Absent" where it has NA. This variable is an ordinal categorical variable (since it deals with quality). There are several categorical variables that have an intrinsic order, and for them we are going to use an ordinal encoder, where the absence will be indicated with 0.
+#
+# Some variables are highly correlated one another. We will see them with the correlation heatmap plotted in SeaBorn. For now, we can see that TotalBsmtSF is just the sum of BsmtFinSF1 and BsmtFinSF2, therefore the latter two can be dropped.
+
+#%%
+cols_to_drop = ["MiscFeature", "Fence", "PoolQC", "Alley", "BsmtFinSF1", "BsmtFinSF2"]
+ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure"]
