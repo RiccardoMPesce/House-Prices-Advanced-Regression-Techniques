@@ -72,4 +72,8 @@ test_df = test_df.assign(TotalSF=test_df["1stFlrSF"]+test_df["2ndFlrSF"])
 train_df.drop(cols_to_drop, axis=1, inplace=True)
 test_df.drop(cols_to_drop, axis=1, inplace=True)
 
+#%% [markdown]
+# ### Imputing NA values
+# Before encoding, we have to impute NA values. Having dropped the columns whose values are mostly NAs, we can now use strategies to impute. We will impute categorical NAs with the class "None" to represent that, for that variable, that feature is not present. For the continuous and ordinal features corresponding or relating to a None, we will set the value of 0.
+
 #%%
