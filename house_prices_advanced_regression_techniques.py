@@ -57,8 +57,6 @@ with pd.option_context("display.max_rows", None):
 
 #%%
 cols_to_drop = ["MiscFeature", "Fence", "PoolQC", "Alley", "BsmtFinSF1", "BsmtFinSF2", "1stFlrSF", "2ndFlrSF"]
-ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond"]
-binary_cols = ["CentralAir", "PavedDrive"]
 
 # Mutating columns
 train_df = train_df.assign(TotalSF=train_df["1stFlrSF"]+train_df["2ndFlrSF"])
@@ -91,10 +89,64 @@ test_df[num_cols] = test_df[num_cols].fillna(0)
 train_df[cat_cols] = train_df[cat_cols].astype("category")
 test_df[cat_cols] = test_df[cat_cols].astype("category")
 
-display(train_df.dtypes)
-
 # Displaying data
 with pd.option_context("display.max_columns", None):
     display(train_df.head(20))
+
+#%% [markdown]
+# ### Encoding categorical variables
+# Now that we have imputed NA values, we need to encode our categorical variables so as to fit the model.
+#
+# Some variables are binary (Yes/No), some others are ordinal (they present an intrinsic order) while some others don't have an order: for the first ones, we define some dicts and map these features in this uniform way. For the latter, we use OneHotEncoding. First we define each list of columns with the name refferring to the mapping we want to use. Then, we apply that mapping with `pandas` built-in method `map()`.
+
+#%%
+ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond", "GarageFinish"]
+street_cols = ["Street", "PavedDrive"]
+shape_cols = ["LotShape"]
+flatness_cols = ["LandContour"]
+utility_cols = ["Utilities"]
+slope_cols = ["LandSlope"]
+
+quality_dict = {
+    "No": 0, "None": 0,
+    "Po": 1,
+    "Fa": 2,
+    "TA": 3,
+    "Gd": 4,
+    "Ex": 5
+}
+
+street_dict = {
+    "Gravel": 0, "N": 0,
+    "P": 0.5,
+    "Paved": 1, "Y": 1
+}
+
+shape_dict = {
+    "Reg": 0,
+    "IR1": 1,
+    "IR2": 2,
+    "IR3": 3
+}
+
+flatness_dict = {
+    "Low": -1,
+    "Lvl": 0,	
+    "Bnk": 1,
+    "HLS": 2
+}
+
+utility_dict = {
+    "ELO": 0,
+    "NoSeWa": 1,
+    "NoSewr": 2,
+    "AllPub": 3	
+}
+
+slope_dict = {
+    "Gtl": 0,
+    "Mod": 1,	
+    "Sev": 2
+}
 
 #%%
