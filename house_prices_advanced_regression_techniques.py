@@ -100,23 +100,25 @@ with pd.option_context("display.max_columns", None):
 # Some variables are binary (Yes/No), some others are ordinal (they present an intrinsic order) while some others don't have an order: for the first ones, we define some dicts and map these features in this uniform way. For the latter, we use OneHotEncoding. First we define each list of columns with the name refferring to the mapping we want to use. Then, we apply that mapping with `pandas` built-in method `map()`.
 
 #%%
-ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond", "GarageFinish"]
 street_cols = ["Street", "PavedDrive"]
 shape_cols = ["LotShape"]
-flatness_cols = ["LandContour"]
-utility_cols = ["Utilities"]
 slope_cols = ["LandSlope"]
+utility_cols = ["Utilities"]
+flatness_cols = ["LandContour"]
+qual_cond_exp_cols = ["ExterQual", "ExterCond", "BsmtQual", "BsmtCond", "BsmtExposure", "BsmtFinType1", "BsmtFinType2", "HeatingQC", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond", "GarageFinish"]
 
-quality_dict = {
-    "No": 0, "None": 0,
-    "Po": 1,
-    "Fa": 2,
-    "TA": 3,
-    "Gd": 4,
-    "Ex": 5
+qual_cond_exp_dict = {
+    "No": 0, "None": 0, 
+    "Unf": 0.5,
+    "RFn": 0.7,
+    "Po": 1, "LwQ": 1, "Mn": 1, "Fin": 1,
+    "Fa": 2, "Rec": 2, "Av": 2,
+    "TA": 3, "BLQ": 3,
+    "Gd": 4, "ALQ": 4,
+    "Ex": 5, "GLQ": 5
 }
 
-street_dict = {
+street_air_dict = {
     "Gravel": 0, "N": 0,
     "P": 0.5,
     "Paved": 1, "Y": 1
@@ -148,5 +150,31 @@ slope_dict = {
     "Mod": 1,	
     "Sev": 2
 }
+
+# Encoding ordinal columns
+train_df[street_cols] = train_df[street_cols].replace(street_air_dict)
+test_df[street_cols] = test_df[street_cols].replace(street_air_dict)
+
+train_df[shape_cols] = train_df[shape_cols].replace(shape_dict)
+test_df[shape_cols] = test_df[shape_cols].replace(shape_dict)
+
+train_df[utility_cols] = train_df[utility_cols].replace(utility_dict)
+test_df[utility_cols] = test_df[utility_cols].replace(utility_dict)
+
+train_df[flatness_cols] = train_df[flatness_cols].replace(flatness_dict)
+test_df[flatness_cols] = test_df[flatness_cols].replace(flatness_dict)
+
+train_df[qual_cond_exp_cols] = train_df[qual_cond_exp_cols].replace(qual_cond_exp_dict)
+test_df[qual_cond_exp_cols] = test_df[qual_cond_exp_cols].replace(qual_cond_exp_dict)
+
+with pd.option_context("display.max_columns", None):
+    display(train_df.head(20))
+
+#%% [markdown]
+# Now that all the ordinal categorical variables have been converted to numbers, we need to fit a One-Hot encoder to the remaining categorical variables, so that we can analyze the correlation.
+#
+# We could have done more feature engineering if we had more data (we could transform other variables such as "Steet" in a way that it would become categorical).
+#
+#
 
 #%%
