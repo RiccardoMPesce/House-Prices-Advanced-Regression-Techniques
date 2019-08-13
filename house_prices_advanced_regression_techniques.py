@@ -96,7 +96,7 @@ with pd.option_context("display.max_columns", None):
 # Some variables are binary (Yes/No), some others are ordinal (they present an intrinsic order) while some others don't have an order: for the first ones, we define some dicts and map these features in this uniform way. For the latter, we use OneHotEncoding. First we define each list of columns with the name refferring to the mapping we want to use. Then, we apply that mapping with `pandas` built-in method `map()`.
 
 #%%
-street_cols = ["Street", "PavedDrive"]
+street_air_cols = ["Street", "PavedDrive", "CentralAir"]
 shape_cols = ["LotShape"]
 slope_cols = ["LandSlope"]
 utility_cols = ["Utilities"]
@@ -148,8 +148,8 @@ slope_dict = {
 }
 
 # Encoding ordinal columns
-train_df[street_cols] = train_df[street_cols].replace(street_air_dict)
-test_df[street_cols] = test_df[street_cols].replace(street_air_dict)
+train_df[street_air_cols] = train_df[street_air_cols].replace(street_air_dict)
+test_df[street_air_cols] = test_df[street_air_cols].replace(street_air_dict)
 
 train_df[shape_cols] = train_df[shape_cols].replace(shape_dict)
 test_df[shape_cols] = test_df[shape_cols].replace(shape_dict)
@@ -183,17 +183,31 @@ left_cats = ["MSZoning", "Street", "LotConfig", "LandSlope", "Neighborhood", "Co
 X = train_df.drop("SalePrice", axis=1)
 y = train_df["SalePrice"]
 
+# To appropriately split back
 train_size = train_df.shape[0]
-test_size = test_df.shape[0]
 
 temp_df = pd.concat([X, test_df])
 
 # Getting idicator
-temp_df = pd.concat([temp_df, pd.get_dummies(temp_df[left_cats])])
-temp_df = temp_df.drop(left_cats, axis=1)
+temp_df = pd.get_dummies(temp_df)
+
+# Splitting back train and test sets
+X = temp_df.iloc[:train_size, :]
+test_df = temp_df.iloc[train_size:, :]
+
+train_df = pd.concat([X, y], axis=1)
 
 with pd.option_context("display.max_columns", None):
-    display(temp_df.head(20))
+    display(train_df.head(20))
+
+#%% [markdown]
+# ### Correlation among variables
+# We are now ready to plot a heatmap of the correlation among variables so as to solve collinearity problems and discard features not related or slightly related to the response.
+
+#%%
+import seaborn as sns
+
+corr_mat = train_df.corr()
 
 
 #%%
