@@ -60,10 +60,6 @@ cols_to_drop = ["MiscFeature", "Fence", "PoolQC", "Alley", "BsmtFinSF1", "BsmtFi
 ordinal_cols = ["ExterQual", "ExterCond", "LandSlope", "BsmtQual", "BsmtCond", "BsmtExposure", "KitchenQual", "FireplaceQu", "GarageQual", "GarageCond"]
 binary_cols = ["CentralAir", "PavedDrive"]
 
-# Selecting numerical and categorical columns
-cat_cols = train_df.select_dtypes(exclude="number")
-num_cols = train_df.select_dtypes("number")
-
 # Mutating columns
 train_df = train_df.assign(TotalSF=train_df["1stFlrSF"]+train_df["2ndFlrSF"])
 test_df = test_df.assign(TotalSF=test_df["1stFlrSF"]+test_df["2ndFlrSF"])
@@ -72,8 +68,33 @@ test_df = test_df.assign(TotalSF=test_df["1stFlrSF"]+test_df["2ndFlrSF"])
 train_df.drop(cols_to_drop, axis=1, inplace=True)
 test_df.drop(cols_to_drop, axis=1, inplace=True)
 
+# Selecting numerical and categorical columns
+cat_cols = train_df.select_dtypes(exclude="number").columns.values.tolist()
+num_cols = train_df.select_dtypes("number").columns.values.tolist()
+# Dropping the response variable from the selection of numerical columns
+num_cols.remove("SalePrice")
+
 #%% [markdown]
 # ### Imputing NA values
 # Before encoding, we have to impute NA values. Having dropped the columns whose values are mostly NAs, we can now use strategies to impute. We will impute categorical NAs with the class "None" to represent that, for that variable, that feature is not present. For the continuous and ordinal features corresponding or relating to a None, we will set the value of 0.
+
+#%%
+# Imputing categorical columns
+train_df[cat_cols] = train_df[cat_cols].fillna("None")
+test_df[cat_cols] = test_df[cat_cols].fillna("None")
+
+# Imputing numerical columns
+train_df[num_cols] = train_df[num_cols].fillna(0)
+test_df[num_cols] = test_df[num_cols].fillna(0)
+
+# Turning non numerical columns into categories
+train_df[cat_cols] = train_df[cat_cols].astype("category")
+test_df[cat_cols] = test_df[cat_cols].astype("category")
+
+display(train_df.dtypes)
+
+# Displaying data
+with pd.option_context("display.max_columns", None):
+    display(train_df.head(20))
 
 #%%
