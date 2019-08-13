@@ -85,10 +85,6 @@ test_df[cat_cols] = test_df[cat_cols].fillna("None")
 train_df[num_cols] = train_df[num_cols].fillna(0)
 test_df[num_cols] = test_df[num_cols].fillna(0)
 
-# Turning non numerical columns into categories
-train_df[cat_cols] = train_df[cat_cols].astype("category")
-test_df[cat_cols] = test_df[cat_cols].astype("category")
-
 # Displaying data
 with pd.option_context("display.max_columns", None):
     display(train_df.head(20))
@@ -175,6 +171,29 @@ with pd.option_context("display.max_columns", None):
 #
 # We could have done more feature engineering if we had more data (we could transform other variables such as "Steet" in a way that it would become categorical).
 #
-#
+# Let's fit a One-Hot Encoder, but first let's select the remaining categorical columns.
+
+#%%
+left_cats = ["MSZoning", "Street", "LotConfig", "LandSlope", "Neighborhood", "Condition1", "Condition2", "BldgType", "HouseStyle", "RoofStyle", "RoofMatl", "Exterior1st", "Exterior2nd", "MasVnrType", "Foundation", "Heating", "Electrical", "Functional", "GarageType", "SaleType", "SaleCondition"]
+
+#%% [mardown]
+# Before proceeding, we need to stack both training and test set, and apply our encoder to the new temporary, set. In this way, we will avoid to find unknown categories during testing.
+
+#%%
+X = train_df.drop("SalePrice", axis=1)
+y = train_df["SalePrice"]
+
+train_size = train_df.shape[0]
+test_size = test_df.shape[0]
+
+temp_df = pd.concat([X, test_df])
+
+# Getting idicator
+temp_df = pd.concat([temp_df, pd.get_dummies(temp_df[left_cats])])
+temp_df = temp_df.drop(left_cats, axis=1)
+
+with pd.option_context("display.max_columns", None):
+    display(temp_df.head(20))
+
 
 #%%
