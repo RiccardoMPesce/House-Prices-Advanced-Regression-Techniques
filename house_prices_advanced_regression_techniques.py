@@ -308,3 +308,6 @@ with open("submission.csv", "a") as f:
 
 #%% [markdown]
 # In Kaggle, we got a Root Mean Squared Logarithmic Error of 0.15575. It can be improved. We'll come back at this later.
+
+
+#%%
