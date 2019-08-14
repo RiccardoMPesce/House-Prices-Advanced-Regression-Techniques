@@ -270,7 +270,41 @@ plt.show()
 # Using this approach, let's get rid of some columns.
 
 #%%
-cols_to_remove = ["GrLivArea", "TotalRmsAbvGrd", "GarageArea"]
+cols_to_remove = ["GrLivArea", "TotRmsAbvGrd", "GarageArea"]
 
 train_df = train_df.drop(cols_to_remove, axis=1)
+test_df = test_df.drop(cols_to_remove, axis=1)
 X = X.drop(cols_to_remove, axis=1)
+
+
+#%% [markdown]
+# ### Random Forest
+# Now, we can fit our random forest model. First we divide X, y in train and validation, and we will see their performances.
+
+#%%
+import csv
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+rf = RandomForestRegressor(n_jobs=-1)
+
+rf.fit(X_train, y_train)
+
+preds = rf.predict(test_df)
+
+id = 1461
+with open("submission.csv", "w") as f:
+    f.write("Id,SalePrice\n")
+
+with open("submission.csv", "a") as f:
+    for n in preds:
+        f.write(str(id) + "," + str(n) + "\n")
+        id += 1
+
+
+#%% [markdown]
+# In Kaggle, we got a Root Mean Squared Logarithmic Error of 0.15575. It can be improved. We'll come back at this later.
