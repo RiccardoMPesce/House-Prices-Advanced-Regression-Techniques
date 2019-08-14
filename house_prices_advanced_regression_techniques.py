@@ -202,12 +202,21 @@ with pd.option_context("display.max_columns", None):
 
 #%% [markdown]
 # ### Correlation among variables
-# We are now ready to plot a heatmap of the correlation among variables so as to solve collinearity problems and discard features not related or slightly related to the response.
+# We calculate the correlation matrix of the features, so as to see which ones are most related with the response (both positively and negatively). 
+# In particular, `corr_mat` contains the correlation matrix while `corr_y` contains the individual correlations of each predictor to the response. 
+# We will remove those columns whose correlation to the response is less, in absolute v
 
 #%%
-import seaborn as sns
-
 corr_mat = train_df.corr()
+corr_threshold = 0.5
 
+# Correlation with the response
+corr_y = corr_mat["SalePrice"]
+low_corr_cols = corr_y[np.abs(corr_y) < 0.5]
+# Converting to list
+low_corr_cols = low_corr_cols.index.values.tolist()
+
+# Printing the number of columns and the names we will drop
+print("Number of weakly correlated variables to the response (with correlation threshold set at " + str(corr_threshold) + ") is " + str(len(low_corr_cols)) + ".")
 
 #%%
