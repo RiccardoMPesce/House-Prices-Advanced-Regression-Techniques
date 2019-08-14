@@ -307,7 +307,27 @@ with open("submission.csv", "a") as f:
 
 
 #%% [markdown]
-# In Kaggle, we got a Root Mean Squared Logarithmic Error of 0.15575. It can be improved. We'll come back at this later.
+# In Kaggle, we got a Root Mean Squared Logarithmic Error of 0.15575. It can be improved. Let's use XGBoost.
 
 
 #%%
+import xgboost as xgb 
+
+xg_reg = xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, gamma=0, subsample=0.75, colsample_bytree=1, max_depth=7)
+
+xg_reg.fit(X_train, y_train)
+
+preds = xg_reg.predict(test_df)
+
+id = 1461
+with open("submission.csv", "w") as f:
+    f.write("Id,SalePrice\n")
+
+with open("submission.csv", "a") as f:
+    for n in preds:
+        f.write(str(id) + "," + str(n) + "\n")
+        id += 1
+
+
+#%% [markdown]
+# With XGBoost regressor, our RMSLE is 0.14493, more than Random Forest. Therefore, we conclude that our Random Forest model is better for this problem.
