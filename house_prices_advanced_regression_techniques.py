@@ -207,7 +207,7 @@ with pd.option_context("display.max_columns", None):
 # We will remove those columns whose correlation to the response is less, in absolute v
 
 #%%
-corr_mat = train_df.corr()
+corr_mat = train_df[num_cols + ["SalePrice"]].corr()
 corr_threshold = 0.5
 
 # Correlation with the response
@@ -216,7 +216,61 @@ low_corr_cols = corr_y[np.abs(corr_y) < 0.5]
 # Converting to list
 low_corr_cols = low_corr_cols.index.values.tolist()
 
+with pd.option_context("display.max_rows", None):
+    print(corr_y)
+
 # Printing the number of columns and the names we will drop
-print("Number of weakly correlated variables to the response (with correlation threshold set at " + str(corr_threshold) + ") is " + str(len(low_corr_cols)) + ".")
+print("The number of weakly correlated variables to the response (with correlation threshold set at " + str(corr_threshold) + ") is " + str(len(low_corr_cols)) + ".")
+
+# Printing such columns
+print(low_corr_cols)
+
+# Printing number of total columns (except response)
+print(len(corr_y) - 1)
+
+#%% [markdown]
+# So, with 225 - 34 = 191 columns, we have reduced our dataset size.
+#
+# Let's now remove these columns, and finally split our dataset into X an y.
 
 #%%
+train_df = train_df.drop(low_corr_cols, axis=1)
+test_df = test_df.drop(low_corr_cols, axis=1)
+
+for e in low_corr_cols:
+    num_cols.remove(e)
+
+# Displaying data
+with pd.option_context("display.max_columns", None):
+    display(train_df.head(20))
+
+X = train_df.drop("SalePrice", axis=1)
+y = train_df["SalePrice"]
+
+#%% [markdown]
+# Let's now plot a heatmap with our correlation matrix. Its purpose is to visualize highly correlated variables.
+#
+# Again, if two variables are highly correlated, we will keep the one who is best correlated with the response
+
+#%%
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+print(train_df[num_cols + ["SalePrice"]].columns)
+
+plt.figure(figsize=(15, 15))
+hm = sns.heatmap(train_df[num_cols + ["SalePrice"]].corr(), annot=True, center=0, square=True)
+# Let's save the plot as a figure
+hm.get_figure().savefig("corr.png")
+plt.show()
+
+#%% [markdown]
+# Here we see that several variables are highly correlated one another. TotalSF and GrLivArea vary identically. We remove the latter since it less slightly less correlated to the response.
+# 
+# Using this approach, let's get rid of some columns.
+
+#%%
+cols_to_remove = ["GrLivArea", "TotalRmsAbvGrd", "GarageArea"]
+
+train_df = train_df.drop(cols_to_remove, axis=1)
+X = X.drop(cols_to_remove, axis=1)
